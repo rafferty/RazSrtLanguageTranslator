@@ -14,21 +14,26 @@ namespace RazSrtLanguageTranslator
     /// </summary>
     class TranslatorHelper
     {
+        private readonly string apiKey;
         private readonly string host;
         private const string route_languages = "/languages?api-version=3.0";
         private const string route_translate = "/translate?api-version=3.0";
 
         private string authToken;
         
-        public TranslatorHelper(string host, string key)
+        public TranslatorHelper(string host, string apiKey)
         {
             this.host = host;
-            InitializeToken(key);
+            this.apiKey = apiKey;
+
+            // For the Authorization Token method as described in https://docs.microsoft.com/en-us/azure/cognitive-services/translator/reference/v3-0-reference#authentication
+            // Note that this generated token expires in 10 minutes.
+            //InitializeToken(apiKey);
         }
 
-        public void InitializeToken(string key)
+        public void InitializeToken(string apiKey)
         {
-            var authTokenSource = new AzureAuthToken(key);
+            var authTokenSource = new AzureAuthToken(apiKey);
             try
             {
                 authToken = authTokenSource.GetAccessToken();
@@ -60,7 +65,7 @@ namespace RazSrtLanguageTranslator
                 request.RequestUri = new Uri(host + route_languages);
 
                 // Add the authorization header
-                request.Headers.Add("Ocp-Apim-Subscription-Key", Properties.Settings.Default.ApiKey);
+                request.Headers.Add("Ocp-Apim-Subscription-Key", apiKey);
 
                 // Send request, get response
                 var response = client.SendAsync(request).Result;
@@ -90,8 +95,8 @@ namespace RazSrtLanguageTranslator
                 request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
                 // Add the authorization header
-                //request.Headers.Add("Ocp-Apim-Subscription-Key", Properties.Settings.Default.ApiKey);
-                request.Headers.Add("Authorization", authToken);
+                request.Headers.Add("Ocp-Apim-Subscription-Key", apiKey);
+                //request.Headers.Add("Authorization", authToken);  // in case the authorization token method is preferred.
 
                 // Send request, get response
                 var response = client.SendAsync(request).Result;

@@ -75,6 +75,8 @@ namespace RazSrtLanguageTranslator
                     }
                     catch
                     {
+                        // If using the Authorization Token method, the token will expire after 10 mins.
+                        // In this case, a new token needs to be requested.
                         Thread.Sleep(30000);
                         translator.InitializeToken(Properties.Settings.Default.ApiKey);
                         Thread.Sleep(5000);
